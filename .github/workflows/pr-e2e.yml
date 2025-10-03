@@ -1,0 +1,27 @@
+name: Pull Request End-to-End Tests
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  end_to_end_tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      # We need to fetch all tags to find the highest one
+      with:
+        fetch-depth: 0
+
+    - uses: ./.github/actions/wait-for-deployment
+      with:
+        target_env: pr-${{ github.event.pull_request.number }}
+        pantheon_site_machine_name: office-artifacts
